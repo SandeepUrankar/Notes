@@ -10,20 +10,33 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
@@ -33,49 +46,106 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sandeepurankar.notes.data.model.Note
 import com.sandeepurankar.notes.ui.components.NoteCard
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun NotesList() {
+fun NotesListScreen() {
 
     val noteListViewModel: NoteListViewModel = viewModel()
     val notes = remember {
         noteListViewModel.getAllNotes()
     }
-    Surface {
-        var dialogState by remember {
-            mutableStateOf(false)
-        }
-        val title = remember { mutableStateOf(TextFieldValue()) }
-        val body = remember { mutableStateOf(TextFieldValue()) }
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-        ) {
-            Button(onClick = {
-                dialogState = true
-            }) {
-                Text(text = "Add a Note")
+    var dialogState by remember {
+        mutableStateOf(false)
+    }
+    val snackbarHostState = remember {
+        SnackbarHostState()
+    }
+    val scope = rememberCoroutineScope()
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(text = "Notes")
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                onClick = { dialogState = true }) {
+                Icon(
+                    modifier = Modifier.size(24.dp),
+                    imageVector = Icons.Default.AddCircle,
+                    contentDescription = "Add note FAB."
+                )
             }
+        }
+    ) { paddingValues ->
+        Surface(modifier = Modifier.padding(paddingValues)) {
+            val title = remember { mutableStateOf(TextFieldValue()) }
+            val body = remember { mutableStateOf(TextFieldValue()) }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 8.dp),
+            ) {
 
-            LazyColumn {
-                items(items = notes, key = { it.id }) { note ->
-                    NoteCard(note = note, onDeleteClicked = {
-                        noteListViewModel.removeNote(it)
-                    })
+                LazyColumn() {
+                    items(items = notes, key = { it.id }) { note ->
+                        NoteCard(note = note, onDeleteClicked = {
+                            noteListViewModel.removeNote(it)
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = "Your note is deleted. 🗒",
+                                    withDismissAction = true,
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
+                        })
+                    }
                 }
             }
-        }
-        if (dialogState) {
-            AddNoteDialog(onSubmit = {
-                if (title.value.text.isNotEmpty() && body.value.text.isNotEmpty())
-                    noteListViewModel.addNote(Note(title = title.value.text, description = body.value.text))
-            }, title, body, onDismissRequest = {
-                dialogState = false
-                title.value = TextFieldValue("")
-                body.value = TextFieldValue("")
-            })
+            if (dialogState) {
+                AddNoteDialog(onSubmit = {
+                    if (title.value.text.isNotEmpty() && body.value.text.isNotEmpty()) {
+                        noteListViewModel.addNote(
+                            Note(
+                                title = title.value.text,
+                                description = body.value.text
+                            )
+                        )
+                        scope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = "Your note has been added. 🗒",
+                                withDismissAction = true,
+                                duration = SnackbarDuration.Short
+                            )
+                        }
+
+                    } else {
+                        scope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = "Please fill the fields while adding a note.",
+                                withDismissAction = true,
+                                duration = SnackbarDuration.Short
+                            )
+                        }
+                    }
+                }, title, body, onDismissRequest = {
+                    dialogState = false
+                    title.value = TextFieldValue("")
+                    body.value = TextFieldValue("")
+                })
+            }
         }
     }
 }

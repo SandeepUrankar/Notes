@@ -5,7 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import com.sandeepurankar.notes.ui.screens.noteList.NotesList
+import com.sandeepurankar.notes.ui.screens.noteList.NotesListScreen
 import com.sandeepurankar.notes.ui.theme.NotesTheme
 
 class MainActivity : ComponentActivity() {
@@ -14,7 +14,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             NotesTheme {
-                NotesList()
+                NotesListScreen()
             }
         }
     }
