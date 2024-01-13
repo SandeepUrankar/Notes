@@ -49,7 +49,6 @@ import com.sandeepurankar.notes.ui.components.NoteCard
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NotesListScreen() {
 

@@ -26,7 +26,6 @@ import com.sandeepurankar.notes.data.model.Note
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun NoteCard(
