@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sandeepurankar.notes.data.model.Note
+import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -66,20 +67,17 @@ fun NoteCard(
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = note.description,
 //                    maxLines = 6,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.bodyMedium
                 )
+                Spacer(modifier = Modifier.height(6.dp))
+
                 Text(
-                    text = note.createdAt.format(
-                        DateTimeFormatter.ofPattern(
-                            "EEE, d MMM hh:mm",
-                            Locale.getDefault()
-                        )
-                    ),
+                    text = note.createdAt,
                     style = MaterialTheme.typography.labelMedium
                 )
             }

@@ -1,8 +1,5 @@
 package com.sandeepurankar.notes.ui.screens.noteList
 
-import android.os.Build
-import androidx.annotation.RequiresApi
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
@@ -38,6 +34,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.sandeepurankar.notes.data.local.getNotes
 import com.sandeepurankar.notes.data.model.Note
 import com.sandeepurankar.notes.ui.components.NoteCard
 import kotlinx.coroutines.launch
@@ -58,9 +56,7 @@ import kotlinx.coroutines.launch
 fun NotesListScreen() {
 
     val noteListViewModel: NoteListViewModel = viewModel()
-    val notes = remember {
-        noteListViewModel.getAllNotes()
-    }
+    val notes = noteListViewModel.notes.collectAsState().value
     var dialogState by remember {
         mutableStateOf(false)
     }
@@ -109,7 +105,7 @@ fun NotesListScreen() {
                 ) {
                     items(items = notes, key = { it.id }) { note ->
                         NoteCard(note = note, onDeleteClicked = {
-                            noteListViewModel.removeNote(it)
+                            noteListViewModel.deleteNote(it)
                             scope.launch {
                                 snackbarHostState.showSnackbar(
                                     message = "Your note is deleted. 🗒",
